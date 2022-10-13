@@ -11,20 +11,16 @@ export const ColumnTypes = {
 }
 
 export const GridColumns = ({columns = []}) => {
-    columns.unshift({dataField: 'id', type: ColumnTypes.Number, name: 'id', sortOrder: columns?.some(x => x.sortOrder) ? null : 'desc'})
-    return columns?.map(({name, dataField, type, isRequired, isEmail, lookup, sortOrder, isMoney, format, isPhone, allowEditing = true, visible}) => {
+    columns?.push({dataField: 'id', type: ColumnTypes.Number, name: 'id', sortOrder: 'asc', visible: false, allowEditing: false})
+    return columns?.map(({name, editorOptions, dataField, type, isRequired, isEmail, lookup, sortOrder, isMoney, format, isPhone, allowEditing = true, visible}) => {
         if (lookup) {
-            lookup = {...{valueExpr: 'id', displayExpr: 'nombre'}, ...lookup}
             type = ColumnTypes.String
         }
-        console.log(lookup)
         const displayName = name ?? dataField;
         return <Column sortOrder={sortOrder} format={isMoney ? 'currency' : format} allowEditing={allowEditing} dataType={type} visible={visible} dataField={dataField} key={dataField} caption={displayName} editorOptions={{
-            onInitialized: (e) => {
-                if (isRequired) e.component.option('validationRules', [{type: 'required'}])
-            }
+            ...editorOptions,
+            format: isMoney ? 'currency' : format,
         }}>
-
             {
                 lookup && <Lookup dataSource={lookup.dataSource} valueExpr={lookup.valueExpr} displayExpr={lookup.displayExpr}/>
             }

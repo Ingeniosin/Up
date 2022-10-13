@@ -1,6 +1,6 @@
 ﻿using Up.Models.Types;
 
-namespace Up.Models; 
+namespace Up.Models.Config; 
 
 public class ClassificationDaysType {
     
@@ -9,6 +9,6 @@ public class ClassificationDaysType {
     public virtual TypePaymentDate TypePaymentDate { get; set; }
     public int TypePaymentDateId { get; set; }
 
-    public ushort Days { get; set; }
+    public int Days { get; set; }
 
 }

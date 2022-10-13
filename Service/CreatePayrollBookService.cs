@@ -1,57 +1,53 @@
-﻿using DynamicApi.Manager.Api.Managers.Static;
+﻿using DynamicApi.Manager.Api.Managers.Action;
 using Microsoft.EntityFrameworkCore;
 using Up.Models;
 using Up.Models.Entity;
 
-namespace Up.Service; 
-
-public class CreatePayrollBookRequestService : StaticModelService<InputCreatePayrollBookRequest> {
+namespace Up.Service {
+    public class CreatePayrollBookService : ActionService<InputCreatePayrollBook> {
     
-    private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-    public CreatePayrollBookRequestService(ApplicationDbContext context) {
-        _context = context;
+        public CreatePayrollBookService(ApplicationDbContext context) {
+            _context = context;
+        }
+
+        public override async Task<object> OnQuery(InputCreatePayrollBook model) {
+            var payRollRequest = await _context.PayrollBooksRequests.Include(x => x.Rows).FirstAsync(x => x.Id == model.IdPayrollBookRequest);
+            var rows = payRollRequest.Rows;
+
+            var payrollBook = new PayrollBook(){
+                StartDate = payRollRequest.StartDate,
+                EndDate = payRollRequest.EndDate,
+            };
+            
+            var minimumSalary = (await _context.ParameterValues.FirstAsync(x => x.IsMinimumSalary)).Value;
+            var transportAssistance = (await _context.ParameterValues.FirstAsync(x => x.IsTransportAssistance)).Value;
+
+
+            var payrollBookRows = rows.AsParallel().Select(rowRequest => {
+                var payrollBookRow = new PayrollBookRow(){ PayrollBookRowRequest = rowRequest, PayrollBook = payrollBook};
+                payrollBookRow.TransportAssistance = rowRequest.EarnedIncome > minimumSalary * 2 ? 0 : transportAssistance;
+                payrollBookRow.TotalDevengated = rowRequest.EarnedIncome + payrollBookRow.TransportAssistance;
+                payrollBookRow.Health = rowRequest.EarnedIncome * 0.04;
+                payrollBookRow.Pension = rowRequest.EarnedIncome * 0.04;
+                payrollBookRow.NetPaid = payrollBookRow.TotalDevengated - payrollBookRow.Health - payrollBookRow.Pension;
+                return payrollBookRow;
+            });
+
+            await _context.PayrollBooks.AddAsync(payrollBook);
+            await _context.PayrollBooksRows.AddRangeAsync(payrollBookRows);
+            await _context.SaveChangesAsync();
+            return payrollBook.Id;
+        }
+
+
+        public override InputCreatePayrollBook GetInstance() =>  new();
     }
 
-    public override async Task<object> OnQuery(InputCreatePayrollBookRequest model) {
-        var startPayrollDay = model.StartDate;
-        var endPayrollDay = model.EndDate;
-        var employes = await _context.Employees.Where(x => !x.ContractEmployee.EndDate.HasValue || x.ContractEmployee.EndDate >= startPayrollDay).ToListAsync();
-
-        var payRollRequest = new PayrollBookRequest();
-
-        var payrollBookRowRequests = employes.Select(employee => {
-            var contract = employee.ContractEmployee;
-            var payroll = new PayrollBookRowRequest{Employee = employee, PayrollBookRequest = payRollRequest};
-
-            var startDay = contract.StartDate > startPayrollDay ? contract.StartDate : startPayrollDay;
-            var endDay = contract.EndDate.HasValue && contract.EndDate < endPayrollDay ? contract.EndDate.Value : endPayrollDay;
-            var workDays = (endDay - startDay).Days + 1;
-            var contractDays = _context.ClassificationDaysTypes.First(x => x.TypePaymentDateId == contract.PaymentDateId).Days;
-            var paymentPeriods = (double)  workDays / contractDays;
-            var earnedIncome = contract.Salary * paymentPeriods;
-            
-            payroll.EarnedIncome = earnedIncome;
-            payroll.DaysSettled = workDays;
-            payroll.StartDate = startDay;
-            payroll.EndDate = endDay;
-            
-            return payroll;
-        }).ToList();
-
-        await _context.AddAsync(payRollRequest);
-        await _context.AddRangeAsync(payrollBookRowRequests);
-        await _context.SaveChangesAsync();
-        return payRollRequest.Id;
-    }
-
-
-    public override InputCreatePayrollBookRequest GetInstance() =>  new();
-}
-
-public class InputCreatePayrollBookRequest {
+    public class InputCreatePayrollBook {
  
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    
+        public int IdPayrollBookRequest { get; set; }
+
+    }
 }

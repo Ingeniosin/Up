@@ -1,14 +1,25 @@
 ﻿import React, {useMemo} from 'react';
 import DataGrid, {MasterDetail} from "devextreme-react/data-grid";
+import {getDsOptions} from "../api/api-service";
 import GridColumns from "./GridColumns";
 
 
-const CustomDataGrid = ({customChildrens = () => null, customizeColumns, columns, allowAdding, allowDeleting, allowUpdating, dataSource, onChangeAny, onNewRowDefaults, editorMode, reference, customProps = {}, children, masterDetail, autoExpand }) => {
+const CustomDataGrid = ({customChildrens = () => null, customizeColumns, ds, add = [], pageSize = 12, filter, columns, allowAdding, allowDeleting, allowUpdating, dataSource, onChangeAny, onNewRowDefaults, editorMode, reference, customProps = {}, children, masterDetail, autoExpand }) => {
+
+    if (ds) {
+        dataSource = getDsOptions(ds, {
+            filter,
+            select: columns.map(c => c.dataField),
+            paginate: true,
+            pageSize: pageSize,
+        })
+    }
+
     const finalProps = useMemo(() => {
         return {...properties({customizeColumns, dataSource, allowAdding, allowDeleting, allowUpdating, onChangeAny, onNewRowDefaults, editorMode}), ...customProps}
     }, [])
     return (
-        <DataGrid ref={reference}{...finalProps}>
+        <DataGrid  ref={reference}{...finalProps}>
             {
                 GridColumns({columns})
             }
@@ -30,7 +41,6 @@ const properties = ({customizeColumns, dataSource, onChangeAny, allowAdding = tr
         enabled: true,
         animation: true,
     },
-
     remoteOperations: {
         filtering: true,
         paging: true,
@@ -71,26 +81,10 @@ const properties = ({customizeColumns, dataSource, onChangeAny, allowAdding = tr
     showBorders: true,
     columnAutoWidth: true,
     wordWrapEnabled: false,
-    allowColumnReordering: false,
+    allowColumnReordering: true,
     showColumnLines: true,
     columnResizingMode: 'widget',
     customizeColumns: (columns) => {
-        columns.filter(column => column.dataField === 'id').forEach(column => {
-            column.allowEditing = false;
-/*
-            column.sortOrder = 'desc';
-*/
-            column.visible = false;
-            column.allowResizing = false;
-            column.allowReordering = false;
-
-        });
-
-        columns.filter(column => column.dataField === 'createdAt' ||  column.dataField === 'updatedAt').forEach(column => {
-            column.visible = false;
-            column.allowEditing = false;
-        })
-
         if (customizeColumns) {
             Object.keys(customizeColumns).forEach(name => {
                 columns.filter(column => column.dataField === name).forEach(column => {
@@ -98,14 +92,14 @@ const properties = ({customizeColumns, dataSource, onChangeAny, allowAdding = tr
                 })
             })
         }
-    }
-  /*  columnChooser: {
+    },
+    columnChooser: {
         enabled: true,
         allowSearch: true,
         mode: "select",
         title: "Selecciona las columnas",
         emptyPanelText: "No hay columnas que mostrar",
-    }*/,
+    },
 
     noDataText: '¡Nada por aqui!',
     dataSource: dataSource,

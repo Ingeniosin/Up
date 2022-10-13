@@ -27,9 +27,11 @@ const setReference = (reference, instance) => {
     })
 }
 
-const CustomForm = ({children, reference, formOptions, onEnterKey}) => {
+const CustomForm = ({children, reference, formOptions, onEnterKey, onFormDataChange, defaultFormData}) => {
     return (
-        <Form  {...formOptions} labelMode={"floating"} onEditorEnterKey={onEnterKey}  onInitialized={({component: instance})  => {
+        <Form  {...formOptions} onFieldDataChanged={() => {
+            if (onFormDataChange) onFormDataChange((oldData) => ({...oldData, ...reference.current.instance.option('formData')}))
+        }} defaultFormData={defaultFormData} labelMode={"floating"} onEditorEnterKey={onEnterKey}  onInitialized={({component: instance})  => {
             if (reference instanceof Array) reference.filter(x => x).forEach(ref => setReference(ref, instance));
             else setReference(reference, instance);
         }} >

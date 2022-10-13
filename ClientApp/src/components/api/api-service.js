@@ -29,7 +29,11 @@ export const getDsOptionsLookup = (url, options) => {
     }
 }
 
-export const getDsLookup = (api, options, display = 'nombre', key = 'id') => {
+export const getDsLookup = (api, options  = {}, display = 'name', key = 'id') => {
+    options = {...options, ...{
+        select: [key, display],
+    }}
+
     return {
         dataSource: getDsOptionsLookup(api, {
             paginate: true,
