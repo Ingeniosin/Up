@@ -17,7 +17,7 @@ namespace Up.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.8")
+                .HasAnnotation("ProductVersion", "6.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -113,9 +113,11 @@ namespace Up.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -135,6 +137,9 @@ namespace Up.Migrations
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp without time zone");

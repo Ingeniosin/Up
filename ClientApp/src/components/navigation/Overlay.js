@@ -1,9 +1,19 @@
-﻿const Overlay = ({title, children}) => {
+﻿const Overlay = ({title, children, text}) => {
     return (
-        <>
-            <h3 style={{marginBottom: "30px", textAlign: 'center'}}>{title}</h3>
-            {children}
-        </>
+        <div className="container-sm p-5 rounded rounded-3 bg-white shadow h-100">
+
+            {
+                title &&  <h2 style={{marginBottom: "30px", textAlign: 'center'}}>{title}</h2>
+
+            }
+            {
+                text &&  <p>{text}</p>
+            }
+
+            <div className="container">
+                {children}
+            </div>
+        </div>
     );
 };
 

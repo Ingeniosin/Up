@@ -12,5 +12,15 @@ public class TypePaymentDate {
     public bool IsDaily { get; set; }
 
     public virtual ClassificationDaysType ClassificationDaysType { get; set; }
-    
+
+
+    public static List<TypePaymentDate> DefaultValues(ApplicationDbContext db) {
+        return new List<TypePaymentDate>(){
+            new(){ Name = "Mensual", IsMonthly = true },
+            new(){ Name = "Diario", IsDaily = true },
+            new(){ Name = "Semanal", IsWeekly = true },
+            new(){ Name = "Quincenal", IsFortnightly = true }
+        };
+    }
+
 }

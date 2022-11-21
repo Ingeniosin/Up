@@ -1,11 +1,12 @@
-﻿using DynamicApi.Manager.Api.Managers.Action;
+﻿using DynamicApi.Serializers;
+using DynamicApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Up.Models;
 using Up.Models.Entity;
 
 namespace Up.Service; 
 
-public class CreatePayrollBookRequestService : ActionService<InputCreatePayrollBookRequest> {
+public class CreatePayrollBookRequestService : IActionService<InputCreatePayrollBookRequest> {
     
     private readonly ApplicationDbContext _context;
 
@@ -13,7 +14,7 @@ public class CreatePayrollBookRequestService : ActionService<InputCreatePayrollB
         _context = context;
     }
 
-    public override async Task<object> OnQuery(InputCreatePayrollBookRequest model) {
+    public async Task<object> OnQuery(InputCreatePayrollBookRequest model, HttpContext httpContext) {
         var startPayrollDay = model.StartDate;
         var endPayrollDay = model.EndDate;
         var employes = await _context.Employees.Include(x => x.ContractEmployee).ThenInclude(x => x.PaymentDate).ThenInclude(x => x.ClassificationDaysType).Where(x => !x.ContractEmployee.EndDate.HasValue || x.ContractEmployee.EndDate >= startPayrollDay).ToListAsync();
@@ -48,8 +49,7 @@ public class CreatePayrollBookRequestService : ActionService<InputCreatePayrollB
         return payRollRequest.Id;
     }
 
-
-    public override InputCreatePayrollBookRequest GetInstance() =>  new();
+    public SerializeType SerializeType => SerializeType.STANDARD;
 }
 
 public class InputCreatePayrollBookRequest {

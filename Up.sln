@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Up", "Up.csproj", "{5C5A333B-8EE9-400A-8B53-076C5B0EBD16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicApi", "..\..\Libraries\DynamicApi\DynamicApi.csproj", "{4272B098-189F-4502-969A-843FFE1EE47A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicApi", "..\..\..\Lib\DynamicApi\DynamicApi.csproj", "{A1501162-1DEC-4A34-A59F-0E50F08DA542}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,9 +14,9 @@ Global
 		{5C5A333B-8EE9-400A-8B53-076C5B0EBD16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C5A333B-8EE9-400A-8B53-076C5B0EBD16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C5A333B-8EE9-400A-8B53-076C5B0EBD16}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4272B098-189F-4502-969A-843FFE1EE47A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4272B098-189F-4502-969A-843FFE1EE47A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4272B098-189F-4502-969A-843FFE1EE47A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4272B098-189F-4502-969A-843FFE1EE47A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1501162-1DEC-4A34-A59F-0E50F08DA542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1501162-1DEC-4A34-A59F-0E50F08DA542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1501162-1DEC-4A34-A59F-0E50F08DA542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1501162-1DEC-4A34-A59F-0E50F08DA542}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

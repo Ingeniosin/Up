@@ -4,7 +4,7 @@ import Overlay from "./navigation/Overlay";
 
 const Params = () => {
     return (
-        <Overlay title={"Prametros de UP"}>
+        <Overlay title={"Prametros de UP"} text={"Parametriza UP para que funcione correctamente:"}>
             <CustomDataGrid dataSource={getDs("ParameterValues")}
                 allowAdding={false}
                 allowDeleting={false}

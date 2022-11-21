@@ -1,4 +1,4 @@
-﻿using DynamicApi.Manager;
+﻿using DynamicApi.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Up.Models.Config;
 using Up.Models.Entity;
@@ -6,7 +6,7 @@ using Up.Models.Types;
 
 namespace Up.Models; 
 
-public class ApplicationDbContext : DynamicDbContext {
+public class ApplicationDbContext : DynamicContext {
     public ApplicationDbContext(DbContextOptions options) : base(options) {
     }
     

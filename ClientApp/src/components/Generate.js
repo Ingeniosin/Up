@@ -1,46 +1,66 @@
-﻿import {Box, Typography} from "@mui/material";
-import {Button} from "devextreme-react";
+﻿import {Button, TextBox} from "devextreme-react";
 import {ButtonItem, RequiredRule, SimpleItem} from "devextreme-react/form";
 import {useRef, useState} from "react";
 import {getDs, getDsLookup, getDsOptions} from "./api/api-service";
 import CustomDataGrid from "./devextreme/CustomDataGrid";
 import CustomForm from "./devextreme/CustomForm";
 import {ColumnTypes} from "./devextreme/GridColumns";
+import Overlay from "./navigation/Overlay";
 
 const Generate = () => {
 
     const [requestId, setRequestId] = useState();
     const [payrollId, setPayrollId] = useState();
 
+    const nameRef = useRef();
+
     const handleSaveRequest = async (e) => {
         const payrollId = await getDs("createPayroll").insert({
-            IdPayrollBookRequest: requestId
+            IdPayrollBookRequest: requestId,
+            name: nameRef.current.instance.option("value")
         });
 
         setPayrollId(payrollId);
     }
 
     return (
-        <div>
-            <Typography variant={"h5"} align={"center"} marginBottom={3}>Generar nómina</Typography>
-            <GenerateForm setRequestId={setRequestId} setPayrollId={setPayrollId}/>
-            {
-                requestId && !payrollId && (
-                    <Box marginY={5}>
-                        <GridRequest requestId={requestId} handleSaveRequest={handleSaveRequest}/>
-                    </Box>
-                )
-            }
+        <Overlay>
 
-            {
-                payrollId && (
-                    <Box marginY={5}>
-                        <GridPayroll payrollId={payrollId}/>
-                    </Box>
-                )
-            }
 
-        </div>
+                <h2 style={{
+                    textAlign: "center",
+                    marginBottom: "30px"
+                }}>Generar un nuevo libro de nomina</h2>
+
+                <p style={{
+                    textAlign: "center",
+                    marginBottom: "30px"
+
+                }}>Genera un nuevo libro de momina, ingresa la siguiente información para calcular los conceptos y valores deducidos y devengados!</p>
+
+
+                <GenerateForm setRequestId={setRequestId} setPayrollId={setPayrollId}/>
+                {
+                    requestId && !payrollId && (
+                        <div className={"my-5"}>
+                            <GridRequest requestId={requestId} handleSaveRequest={handleSaveRequest}>
+                                <TextBox ref={nameRef} placeholder={"Nombre del libro de nomina"}></TextBox>
+                            </GridRequest>
+
+
+                        </div>
+                    )
+                }
+
+                {
+                    payrollId && (
+                        <div className={"my-5"}>
+                            <GridPayroll payrollId={payrollId}/>
+                        </div>
+                    )
+                }
+
+        </Overlay>
     );
 };
 
@@ -48,15 +68,22 @@ const GridPayroll = ({payrollId}) => {
     return (
         <>
 
+            <hr/>
+            <h3 style={{textAlign: "center", marginBottom: "30px"}}>¡Nuevo libro de nomina guardado!</h3>
+
+            <p style={{textAlign: "center", marginBottom: "30px"}}>
+                Generaste un nuevo libro de nomina, aqui podras ver los detalles de la nomina, puedes descargar el libro de nomina en formato Excel o imprimirlo, puedes verlo desde ya en la seccion de <strong>registros</strong>.
+            </p>
+
             <CustomDataGrid allowDeleting={false} allowAdding={false} allowUpdating={false}
-            ds={"payrollbook"}
+            ds={"PayrollBooksRows"}
             add={["payrollBookRowRequest"]}
             pageSize={12}
             filter={['PayrollBookId','=',payrollId]}
             columns={[
-                {dataField: "payrollBookRowRequest.employeeId", name:"Empleado", isRequired: true, lookup: getDsLookup("employee", null, "fullName")},
-                {dataField: "payrollBookRowRequest.employee.contractEmployee.typeContractId", sortOrder: 'asc', name:"Tipo de contrato", isRequired: true, lookup: getDsLookup("typecontract")},
-                {dataField: "payrollBookRowRequest.employee.contractEmployee.paymentDateId", name:"Tipo de pago", isRequired: true, lookup: getDsLookup("typepaymentdate")},
+                {dataField: "payrollBookRowRequest.employeeId", name:"Empleado", isRequired: true, lookup: getDsLookup("Employees", null, "fullName")},
+                {dataField: "payrollBookRowRequest.employee.contractEmployee.typeContractId", sortOrder: 'asc', name:"Tipo de contrato", isRequired: true, lookup: getDsLookup("TypeContracts")},
+                {dataField: "payrollBookRowRequest.employee.contractEmployee.paymentDateId", name:"Tipo de pago", isRequired: true, lookup: getDsLookup("TypePaymentDates")},
                 {dataField: "payrollBookRowRequest.employee.contractEmployee.paymentDate.classificationDaysType.days", name:"Información dias", isRequired: true, type: ColumnTypes.Number},
                 {dataField: "payrollBookRowRequest.startDate", name:"Fecha de inicio", type: ColumnTypes.Date, isRequired: true},
                 {dataField: "payrollBookRowRequest.endDate", name:"Fecha de finalización", type: ColumnTypes.Date, isRequired: true},
@@ -79,20 +106,26 @@ const GridPayroll = ({payrollId}) => {
 }
 
 
-const GridRequest = ({requestId, handleSaveRequest}) => {
+const GridRequest = ({requestId, handleSaveRequest, children}) => {
     return (
         <>
+            <hr/>
+            <h3 style={{textAlign: "center", marginBottom: "30px"}}>¡Nomina generada con exito!</h3>
+            <p style={{
+                textAlign: "center",
+                marginBottom: "30px"
+            }}>Esta es la previsualización de la nomina, aqui podras modificar los valores de los conceptos y los dias liquidados, una vez termines de modificar los valores, presiona el boton de guardar para generar el libro de nomina.</p>
+
             <CustomDataGrid allowDeleting={false} allowAdding={false} editorMode={'cell'}
-                ds={"payrollbookrequests"}
-                add={["employee.contractEmployee"]}
-                            pageSize={12}
+                ds={"PayrollBookRowRequests"}
+                add={["employee.contractEmployee"]} pageSize={12}
                 filter={['PayrollBookRequestId','=',requestId]}
                 columns={[
                     {dataField: "startDate", name:"Fecha de inicio", type: ColumnTypes.Date, isRequired: true, allowEditing: false},
                     {dataField: "endDate", name:"Fecha de finalización", type: ColumnTypes.Date, isRequired: true, allowEditing: false},
-                    {dataField: "employeeId", name:"Empleado", allowEditing: false, isRequired: true, lookup: getDsLookup("employee", null, "fullName")},
-                    {dataField: "employee.contractEmployee.typeContractId", allowEditing: false, sortOrder: 'asc', name:"Tipo de contrato", isRequired: true, lookup: getDsLookup("typecontract")},
-                    {dataField: "employee.contractEmployee.paymentDateId", allowEditing: false, name:"Tipo de pago", isRequired: true, lookup: getDsLookup("typepaymentdate")},
+                    {dataField: "employeeId", name:"Empleado", allowEditing: false, isRequired: true, lookup: getDsLookup("Employees", null, "fullName")},
+                    {dataField: "employee.contractEmployee.typeContractId", allowEditing: false, sortOrder: 'asc', name:"Tipo de contrato", isRequired: true, lookup: getDsLookup("TypeContracts")},
+                    {dataField: "employee.contractEmployee.paymentDateId", allowEditing: false, name:"Tipo de pago", isRequired: true, lookup: getDsLookup("TypePaymentDates")},
                     {dataField: "daysSettled", name:"Días liquidados", isRequired: true, type: ColumnTypes.Number},
                     {dataField: "overtime", name:"Horas extras", type: ColumnTypes.Number, isMoney: true},
                     {dataField: "nightlySurcharges", name:"Recargos nocturnos", type: ColumnTypes.Number, isMoney: true},
@@ -101,9 +134,14 @@ const GridRequest = ({requestId, handleSaveRequest}) => {
                     {dataField: "earnedIncome", name:"Salario devengado", allowEditing: false, isRequired: true, type: ColumnTypes.Number, isMoney: true},
                 ]}>
             </CustomDataGrid>
-            <Box display={"flex"} alignItems={"center"} justifyContent={"center"} marginTop={2}>
-                <Button text={"Guardar"} type={"success"} onClick={handleSaveRequest}/>
-            </Box>
+            <div className="mx-5 my-4 px-5">
+                {children}
+            </div>
+
+            <div className={"d-flex justify-content-center align-items-center my-2"}>
+                <Button text={"Guardar"} type={"default"} onClick={handleSaveRequest}/>
+            </div>
+
         </>
     );
 }
@@ -126,33 +164,37 @@ const GenerateForm = ({setRequestId, setPayrollId}) => {
     }
 
     return (
-        <CustomForm reference={formRef} onEnterKey={onSubmit}  formOptions={{
-            colCount: 11
-        }}>
-            <SimpleItem colSpan={5} dataField={"startDate"} editorType={"dxDateBox"} label={{text: "Fecha de inicio"}} editorOptions={{
-                onValueChanged: ({value}) => {
-                    const endEditor = formRef.current.instance.getEditor('endDate');
-                    const endVal = endEditor.option('value');
-                    if(endVal && endVal < value){
-                        endEditor.option('value', null);
-                    }
-                    endEditor.option('min', value);
+        <div>
 
-                }
+            <CustomForm reference={formRef} onEnterKey={onSubmit}  formOptions={{
+                colCount: 11
             }}>
-                <RequiredRule message={"La fecha de inicio es requerida"}/>
-            </SimpleItem>
+                <SimpleItem colSpan={4} dataField={"startDate"} editorType={"dxDateBox"} label={{text: "Fecha de inicio"}} editorOptions={{
+                    onValueChanged: ({value}) => {
+                        const endEditor = formRef.current.instance.getEditor('endDate');
+                        const endVal = endEditor.option('value');
+                        if(endVal && endVal < value){
+                            endEditor.option('value', null);
+                        }
+                        endEditor.option('min', value);
 
-            <SimpleItem colSpan={5} dataField={"endDate"} editorType={"dxDateBox"} label={{text: "Fecha de finalización"}}>
-                <RequiredRule message={"La fecha de finalización es requerida"}/>
-            </SimpleItem>
+                    }
+                }}>
+                    <RequiredRule message={"La fecha de inicio es requerida"}/>
+                </SimpleItem>
 
-            <ButtonItem colSpan={1} horizontalAlignment={"center"} verticalAlignment={"center"} buttonOptions={{
-                text: "Generar",
-                type: "default",
-                onClick: onSubmit
-            }}/>
-        </CustomForm>
+                <SimpleItem colSpan={4} dataField={"endDate"} editorType={"dxDateBox"} label={{text: "Fecha de finalización"}}>
+                    <RequiredRule message={"La fecha de finalización es requerida"}/>
+                </SimpleItem>
+
+                <ButtonItem colSpan={3} horizontalAlignment={"center"} verticalAlignment={"center"} buttonOptions={{
+                    text: "Generar",
+                    type: "default",
+                    onClick: onSubmit
+                }}/>
+            </CustomForm>
+        </div>
+
     );
 }
 
